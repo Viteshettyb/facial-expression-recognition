@@ -1,0 +1,34 @@
+# Keep the deployment bundle to the application and its two model files.
+# Datasets, experiments and training code are not needed to serve a request.
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+data/
+processed/
+artifacts/
+frontend/node_modules/
+frontend/dist/
+
+# Training experiments. The SERVED checkpoint is runs/improved_resnet18/ and is
+# pulled back in by includeFiles in vercel.json.
+runs/exp*/
+runs/phase*/
+runs/comparison/
+runs/baseline_resnet18/
+
+# Training and analysis scripts - never imported by backend/app/main.py
+train_*.py
+preprocess*.py
+prepare_expw.py
+merge_datasets.py
+domain_probe.py
+provenance_aug.py
+compare_models.py
+verify_checkpoint.py
+verify_setup.py
+phase4*.py
+video_pipeline.py
+setup.bat
+docs/

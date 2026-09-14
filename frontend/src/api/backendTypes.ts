@@ -155,6 +155,11 @@ export interface WireHealth {
   checkpoint_epoch: number | null;
   validation_macro_f1: number | null;
   class_names: string[];
+  /** Platform limits, reported by the server rather than assumed by
+   *  the client: a serverless deployment caps the request body far
+   *  below what a local uvicorn accepts. */
+  max_upload_bytes?: number;
+  async_jobs?: boolean;
 }
 
 /** `POST /api/live/frame` — one camera frame, one stateless prediction. */

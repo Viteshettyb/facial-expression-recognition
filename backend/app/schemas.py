@@ -18,6 +18,10 @@ class HealthResponse(BaseModel):
     checkpoint_epoch: int | None
     validation_macro_f1: float | None
     class_names: list[str]
+    # Platform limits the client must respect. Reported rather than assumed:
+    # the request-body cap differs between a local server and a serverless one.
+    max_upload_bytes: int = 200 * 1024 * 1024
+    async_jobs: bool = True
 
 
 class JobCreated(BaseModel):

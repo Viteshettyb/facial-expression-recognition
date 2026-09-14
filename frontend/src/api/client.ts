@@ -26,10 +26,24 @@ import { mapReport } from './mapReport';
  * ---------------------------------------------------------------------------
  */
 
+/**
+ * Where the API lives.
+ *
+ *  1. An explicit VITE_API_BASE_URL (or VITE_API_URL) always wins - that is how
+ *     you point a local frontend at a deployed backend, or vice versa.
+ *  2. Otherwise, in a production build, the API is SAME-ORIGIN: the deployment
+ *     serves the static frontend and rewrites /api/* to the Python function, so
+ *     an empty base produces relative URLs like `/api/health`. No cross-origin
+ *     request means no CORS to configure and nothing to misconfigure.
+ *  3. Only the dev server falls back to 127.0.0.1:8000, where uvicorn runs.
+ *
+ * A localhost URL can therefore never reach a production bundle unless someone
+ * deliberately sets the environment variable to one.
+ */
+const ENV_BASE = (import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_URL ?? '').trim();
+
 const API_BASE_URL = (
-  import.meta.env.VITE_API_URL ??
-  import.meta.env.VITE_API_BASE_URL ??
-  'http://127.0.0.1:8000'
+  ENV_BASE !== '' ? ENV_BASE : import.meta.env.DEV ? 'http://127.0.0.1:8000' : ''
 ).replace(/\/$/, '');
 
 export const apiConfig = { baseUrl: API_BASE_URL };
@@ -108,7 +122,8 @@ export function uploadVideo(
     xhr.onerror = () =>
       reject(
         new Error(
-          `Could not reach the analysis service at ${API_BASE_URL}. Is the FastAPI server running?`,
+          `Could not reach the analysis service at ${API_BASE_URL || window.location.origin}. `
+            + 'Is the API running?',
         ),
       );
     xhr.ontimeout = () => reject(new Error('The upload timed out.'));
@@ -239,4 +254,42 @@ export async function analyzeLiveFrame(
   });
   if (!res.ok) throw new Error(await errorText(res, 'Live inference failed'));
   return (await res.json()) as WireLiveFrame;
+}
+
+/**
+ * Platform limits, fetched once and cached.
+ *
+ * The client used to hardcode "200 MB" and always use the background-job
+ * endpoint. Both are properties of the DEPLOYMENT, not of the app: a serverless
+ * host caps the request body at a few megabytes and cannot keep a job in memory
+ * between two requests. Asking the server is the only way the UI can tell the
+ * truth about where it is running.
+ *
+ * If the probe fails the local defaults are kept, so a broken health endpoint
+ * degrades to the behaviour this app always had rather than blocking the user.
+ */
+export interface ServerLimits {
+  maxUploadBytes: number;
+  asyncJobs: boolean;
+}
+
+const DEFAULT_LIMITS: ServerLimits = { maxUploadBytes: 200 * 1024 * 1024, asyncJobs: true };
+let limitsPromise: Promise<ServerLimits> | null = null;
+
+export function getServerLimits(signal?: AbortSignal): Promise<ServerLimits> {
+  if (!limitsPromise) {
+    limitsPromise = getHealth(signal)
+      .then((h) => ({
+        maxUploadBytes:
+          typeof h.max_upload_bytes === 'number' && h.max_upload_bytes > 0
+            ? h.max_upload_bytes
+            : DEFAULT_LIMITS.maxUploadBytes,
+        asyncJobs: h.async_jobs !== false,
+      }))
+      .catch(() => {
+        limitsPromise = null; // let a later attempt retry rather than cache a failure
+        return DEFAULT_LIMITS;
+      });
+  }
+  return limitsPromise;
 }

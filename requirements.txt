@@ -1,14 +1,29 @@
 # Runtime dependencies for the Facial Expression Recognition backend.
 # Pinned to the versions this project is known to work with.
 #
-# NOTE: torch and torchvision are NOT listed here on purpose. They must be
-# installed from the PyTorch index (CUDA or CPU build) — setup_backend.bat
-# does this for you. See SETUP_WINDOWS.md if installing manually.
+# This file is used BOTH by local development and by the Vercel Python
+# function. The environment markers below are what let one file serve both:
+#
+#   * torch/torchvision are installed ONLY on Linux, from the CPU index. On
+#     Windows the markers skip them entirely, so running `pip install -r` on a
+#     development machine never replaces a working CUDA build with a CPU one.
+#     Install torch locally via setup_backend.bat / SETUP_WINDOWS.md as before.
+#
+#   * OpenCV is headless on Linux. The regular wheel links against libGL.so.1,
+#     which a serverless image does not ship, and the import fails at cold
+#     start with no obvious cause. Both distributions provide `cv2`.
+
+--extra-index-url https://download.pytorch.org/whl/cpu
 
 fastapi==0.141.1
 uvicorn[standard]==0.52.4
 python-multipart==0.0.32
 
 mediapipe==1.0.1
-opencv-contrib-python==5.0.0.93
 numpy==2.5.2
+
+opencv-contrib-python==5.0.0.93 ; sys_platform != "linux"
+opencv-contrib-python-headless==5.0.0.93 ; sys_platform == "linux"
+
+torch==2.11.0+cpu ; sys_platform == "linux"
+torchvision==0.26.0+cpu ; sys_platform == "linux"

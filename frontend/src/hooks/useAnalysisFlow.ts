@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { runAnalysis, uploadVideo } from '../api/client';
+import { analyzeVideoSync, getServerLimits, runAnalysis, uploadVideo } from '../api/client';
 import type {
   AnalysisResult,
   FlowStage,
@@ -139,20 +139,39 @@ export function useAnalysisFlow(): AnalysisFlow {
       setStage('uploading');
       setActiveStep('upload');
       setStatusMessage('Uploading video…');
-      const handle = await uploadVideo(file, setUploadPercent, controller.signal);
 
-      setStage('processing');
-      setStatusMessage('Starting analysis…');
-      const analysis = await runAnalysis(
-        handle,
-        video,
-        (p) => {
-          setAnalysisPercent(p.percent);
-          setActiveStep(p.stepId as ProcessingStepId);
-          setStatusMessage(p.message);
-        },
-        controller.signal,
-      );
+      // Which upload path exists is a property of the deployment. A serverless
+      // host cannot hold a job in memory between the request that creates it
+      // and the request that polls it, so it advertises async_jobs=false and we
+      // use the single round trip instead of handing out a job id we could not
+      // honour.
+      const limits = await getServerLimits(controller.signal);
+
+      let analysis;
+      if (limits.asyncJobs) {
+        const handle = await uploadVideo(file, setUploadPercent, controller.signal);
+        setStage('processing');
+        setStatusMessage('Starting analysis…');
+        analysis = await runAnalysis(
+          handle,
+          video,
+          (p) => {
+            setAnalysisPercent(p.percent);
+            setActiveStep(p.stepId as ProcessingStepId);
+            setStatusMessage(p.message);
+          },
+          controller.signal,
+        );
+      } else {
+        setUploadPercent(100);
+        setStage('processing');
+        setActiveStep('infer');
+        setAnalysisPercent(50);
+        setStatusMessage('Analysing video…');
+        analysis = await analyzeVideoSync(file, video, controller.signal);
+        setAnalysisPercent(100);
+        setActiveStep('report');
+      }
 
       setResult(analysis);
       setStage('complete');

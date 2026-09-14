@@ -61,10 +61,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# A same-origin deployment (frontend and API behind one domain) needs no CORS
+# entries at all - the browser never makes a cross-origin request. The list and
+# regex below exist for local development and for reaching the dev server from a
+# phone on the LAN; both are configurable so production never has to ship a
+# hardcoded localhost allowlist.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173",
-                   "http://localhost:4173"],
+    allow_origins=list(SETTINGS.cors_origins),
     # Live camera on a phone means the dev server is reached over the LAN, so
     # the origin is a private IP rather than localhost. Private ranges only.
     allow_origin_regex=r"https?://(localhost|127\.0\.0\.1|10\.\d{1,3}\.\d{1,3}\.\d{1,3}"
@@ -139,6 +143,10 @@ async def health():
         checkpoint_epoch=info.epoch,
         validation_macro_f1=info.val_macro_f1,
         class_names=info.class_names,
+        # The UI reads these back rather than hardcoding them, so a deployment
+        # with a 4.5 MB body cap advertises 4 MB instead of promising 200.
+        max_upload_bytes=SETTINGS.max_upload_bytes,
+        async_jobs=SETTINGS.async_jobs_enabled,
     )
 
 
@@ -206,6 +214,15 @@ async def live_frame(frame: UploadFile = File(...)):
           tags=["analysis"])
 async def create_job(background: BackgroundTasks, file: UploadFile = File(...)):
     """Asynchronous analysis for long videos: poll /api/jobs/{id}."""
+    if not SETTINGS.async_jobs_enabled:
+        # Serverless: the instance that accepted this job may not be the one
+        # that receives the poll, so a job id we hand out could be a promise we
+        # cannot keep. Fail loudly and point at the endpoint that does work.
+        raise HTTPException(
+            status_code=501,
+            detail="Background jobs are disabled in this deployment because "
+                   "job state cannot outlive a single request. Use "
+                   "POST /analyze-video instead.")
     workdir, path, _ = _save_upload(file)
     jobs: JobStore = STATE["jobs"]
     jobs.sweep()

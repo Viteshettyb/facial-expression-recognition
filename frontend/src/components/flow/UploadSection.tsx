@@ -1,16 +1,30 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { getServerLimits } from '../../api/client';
 import type { AnalysisFlow } from '../../hooks/useAnalysisFlow';
 import { cx, formatBytes, formatDuration } from '../../lib/format';
 import { Badge, Button, Card, Reveal, Section, SectionHeader, Spinner } from '../ui/primitives';
 import { IconCheck, IconClose, IconUpload, IconVideo } from '../ui/icons';
 
 const ACCEPT = 'video/mp4,video/quicktime,video/webm,video/x-matroska,video/avi';
-const MAX_BYTES = 200 * 1024 * 1024;
+/** Used until the server reports its real cap; a serverless host allows far less. */
+const FALLBACK_MAX_BYTES = 200 * 1024 * 1024;
 
 export function UploadSection({ flow }: { flow: AnalysisFlow }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  // The upload cap belongs to the deployment, not to the UI. Ask the server.
+  const [maxBytes, setMaxBytes] = useState(FALLBACK_MAX_BYTES);
+
+  useEffect(() => {
+    let alive = true;
+    void getServerLimits().then((l) => {
+      if (alive) setMaxBytes(l.maxUploadBytes);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const busy = flow.stage === 'uploading' || flow.stage === 'processing';
 
@@ -21,14 +35,16 @@ export function UploadSection({ flow }: { flow: AnalysisFlow }) {
         setLocalError('That file is not a video. Please choose an MP4, MOV, WEBM or MKV file.');
         return;
       }
-      if (file.size > MAX_BYTES) {
-        setLocalError(`Video is too large (${formatBytes(file.size)}). The limit is 200 MB.`);
+      if (file.size > maxBytes) {
+        setLocalError(
+          `Video is too large (${formatBytes(file.size)}). The limit is ${formatBytes(maxBytes)}.`,
+        );
         return;
       }
       setLocalError(null);
       flow.selectVideo(file);
     },
-    [flow],
+    [flow, maxBytes],
   );
 
   return (
@@ -81,7 +97,7 @@ export function UploadSection({ flow }: { flow: AnalysisFlow }) {
                       Drop your video here
                     </p>
                     <p className="text-base text-foreground/55 max-w-[42ch]">
-                      or click to browse. MP4, MOV, WEBM or MKV — up to 200 MB.
+                      or click to browse. MP4, MOV, WEBM or MKV — up to {formatBytes(maxBytes)}.
                     </p>
                   </div>
 
