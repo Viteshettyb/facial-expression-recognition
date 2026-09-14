@@ -8,8 +8,7 @@
     "api/index.py": {
       "memory": 3009,
       "maxDuration": 300,
-      "includeFiles": "{runs/improved_resnet18/best_model.pt,models/**,ml/**,backend/**,configuration/**,utilities/**}",
-      "excludeFiles": "{data/**,processed/**,artifacts/**,docs/**,frontend/**,.venv/**,node_modules/**,runs/exp*/**,runs/phase*/**,runs/comparison/**,runs/baseline_resnet18/**,runs/**/*.csv,runs/**/*.log,runs/**/history.csv,**/__pycache__/**,**/*.pyc,train_*.py,preprocess*.py,prepare_expw.py,merge_datasets.py,domain_probe.py,provenance_aug.py,compare_models.py,verify_*.py,phase4*.py,video_pipeline.py}"
+      "includeFiles": "{runs/improved_resnet18/best_model.pt,models/**,ml/**,backend/**,configuration/**,utilities/**}"
     }
   },
   "rewrites": [

@@ -1,22 +1,40 @@
-# Keep the deployment bundle to the application and its two model files.
-# Datasets, experiments and training code are not needed to serve a request.
+# What never reaches Vercel.
+#
+# This file carries ALL of the exclusions. vercel.json's `excludeFiles` cannot:
+# it is capped at 256 characters, and the list below is far longer than that.
+# .vercelignore has no length limit and excludes files from the upload itself,
+# which is strictly better - an excluded file is never transferred, never
+# builds, and never counts toward the function bundle.
+#
+# The two files the model needs are NOT listed here, and are pulled into the
+# function bundle explicitly by `includeFiles` in vercel.json:
+#   models/blaze_face_short_range.tflite
+#   runs/improved_resnet18/best_model.pt
+#
+# Note: frontend/ sources are deliberately NOT excluded. The build command
+# compiles them on Vercel, so removing them here would break the build.
+
 .venv/
 venv/
 __pycache__/
 *.pyc
 
+# Datasets and derived artifacts. Training-only, and enormous.
 data/
 processed/
 artifacts/
+
 frontend/node_modules/
 frontend/dist/
 
-# Training experiments. The SERVED checkpoint is runs/improved_resnet18/ and is
-# pulled back in by includeFiles in vercel.json.
+# Training experiments. The SERVED checkpoint lives in runs/improved_resnet18/
+# and is kept; everything else under runs/ is experiment history.
 runs/exp*/
 runs/phase*/
 runs/comparison/
 runs/baseline_resnet18/
+runs/**/*.csv
+runs/**/*.log
 
 # Training and analysis scripts - never imported by backend/app/main.py
 train_*.py
