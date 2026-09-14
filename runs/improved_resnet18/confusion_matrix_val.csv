@@ -1,0 +1,8 @@
+true|pred,neutral,happiness,surprise,sadness,anger,disgust,fear
+neutral,1406,32,16,112,19,2,1
+happiness,68,1203,24,16,10,0,1
+surprise,18,10,436,2,7,0,11
+sadness,94,7,6,409,9,0,3
+anger,25,6,6,11,309,6,1
+disgust,0,0,1,1,4,12,0
+fear,0,3,19,2,3,0,59

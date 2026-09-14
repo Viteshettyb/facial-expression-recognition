@@ -1,0 +1,89 @@
+# ---------------------------------------------------------------
+# Python environment and caches
+# ---------------------------------------------------------------
+
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---------------------------------------------------------------
+# Node / Frontend
+# ---------------------------------------------------------------
+
+frontend/node_modules/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# ---------------------------------------------------------------
+# Runtime output
+# ---------------------------------------------------------------
+
+artifacts/
+fer_job_*/
+
+# ---------------------------------------------------------------
+# Local environment / secrets
+# ---------------------------------------------------------------
+
+.env
+.env.*
+!.env.example
+
+frontend/.env
+frontend/.env.local
+
+# ---------------------------------------------------------------
+# Training datasets
+# DO NOT upload datasets to GitHub
+# ---------------------------------------------------------------
+
+data/
+processed/
+
+*.7z
+*.zip
+*.rar
+*.tar
+*.gz
+
+# ---------------------------------------------------------------
+# ML experiment outputs
+# Keep ONLY the production checkpoint required by the application
+# ---------------------------------------------------------------
+
+runs/*
+!runs/improved_resnet18/
+!runs/improved_resnet18/best_model.pt
+
+# Ignore all other model/checkpoint files
+*.pt
+*.pth
+*.ckpt
+
+# Re-allow the production checkpoint
+!runs/improved_resnet18/best_model.pt
+
+# ---------------------------------------------------------------
+# Temporary / generated files
+# ---------------------------------------------------------------
+
+*.log
+*.tmp
+*.temp
+
+# ---------------------------------------------------------------
+# OS files
+# ---------------------------------------------------------------
+
+Thumbs.db
+desktop.ini
+.DS_Storefrontend/public/__run_clip.mp4

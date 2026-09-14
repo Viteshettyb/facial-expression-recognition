@@ -1,0 +1,414 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Emotion Recognition — cinematic design tokens.
+
+   Token and utility NAMES are unchanged from the original light theme so
+   every component keeps working untouched; only their values and the
+   surface treatments below have been retuned for a deep filmic ground.
+   Fluid type scale, content-width container, glass surfaces.
+------------------------------------------------------------------ */
+:root {
+  /* Deep cinematic ground with a faint green cast, not a flat neutral black. */
+  --background: #080d0b;
+  /* Elevated surface colour that the glass gradients are mixed from. */
+  --card: #101917;
+  --foreground: #e8f0ea;
+  --muted: #8fa396;
+
+  /* Luminous brand green reads as the "lit" element against the dark ground;
+     deep ink sits on top of it for a strong, accessible contrast ratio. */
+  --primary-cta: #4bb03f;
+  --primary-cta-text: #04120b;
+  --secondary-cta: #16211e;
+  --secondary-cta-text: #d7e6da;
+  --accent: #5db94f;
+  --background-accent: #74d363;
+  --radius: 1.5rem;
+
+  --width-content-width: clamp(40rem, 72.5vw, 100rem);
+  --vw-1_5: 1.5vw;
+
+  --text-2xs: clamp(0.465rem, 0.62vw, 0.62rem);
+  --text-xs: clamp(0.54rem, 0.72vw, 0.72rem);
+  --text-sm: clamp(0.615rem, 0.82vw, 0.82rem);
+  --text-base: clamp(0.69rem, 0.92vw, 0.92rem);
+  --text-lg: clamp(0.75rem, 1vw, 1rem);
+  --text-xl: clamp(0.825rem, 1.1vw, 1.1rem);
+  --text-2xl: clamp(0.975rem, 1.3vw, 1.3rem);
+  --text-3xl: clamp(1.2rem, 1.6vw, 1.6rem);
+  --text-4xl: clamp(1.5rem, 2vw, 2rem);
+  --text-5xl: clamp(2.025rem, 2.75vw, 2.75rem);
+  --text-6xl: clamp(2.475rem, 3.3vw, 3.3rem);
+  --text-7xl: clamp(3rem, 4vw, 4rem);
+  --text-8xl: clamp(3.5rem, 4.5vw, 4.5rem);
+  --text-9xl: clamp(5.25rem, 7vw, 7rem);
+
+  /* Emotion palette — same hue identity, raised in luminance so each class
+     stays legible and distinguishable against the dark ground. */
+  --emotion-happy: #74d165;
+  --emotion-neutral: #9fb4a2;
+  --emotion-surprise: #f0b74a;
+  --emotion-sad: #6ea4dc;
+  --emotion-angry: #e4694f;
+  --emotion-fear: #a888de;
+  --emotion-disgust: #9bb45c;
+}
+
+@media (max-width: 1440px) and (min-width: 769px) {
+  :root { --width-content-width: 87.5vw; }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --text-2xs: 2.5vw; --text-xs: 2.75vw; --text-sm: 3vw; --text-base: 3.25vw;
+    --text-lg: 3.5vw; --text-xl: 4.25vw; --text-2xl: 5vw; --text-3xl: 6vw;
+    --text-4xl: 7vw; --text-5xl: 7.5vw; --text-6xl: 8.5vw; --text-7xl: 10vw;
+    --text-8xl: 12vw; --text-9xl: 14vw;
+    --width-content-width: 84vw;
+  }
+}
+
+@theme inline {
+  --default-font-family: "Inter", sans-serif;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 2rem;
+
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-primary-cta: var(--primary-cta);
+  --color-primary-cta-text: var(--primary-cta-text);
+  --color-secondary-cta: var(--secondary-cta);
+  --color-secondary-cta-text: var(--secondary-cta-text);
+  --color-accent: var(--accent);
+  --color-background-accent: var(--background-accent);
+
+  --width-content-width: var(--width-content-width);
+
+  --text-2xs: var(--text-2xs);
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-base: var(--text-base);
+  --text-lg: var(--text-lg);
+  --text-xl: var(--text-xl);
+  --text-2xl: var(--text-2xl);
+  --text-3xl: var(--text-3xl);
+  --text-4xl: var(--text-4xl);
+  --text-5xl: var(--text-5xl);
+  --text-6xl: var(--text-6xl);
+  --text-7xl: var(--text-7xl);
+  --text-8xl: var(--text-8xl);
+  --text-9xl: var(--text-9xl);
+}
+
+* { border-color: color-mix(in srgb, var(--foreground) 11%, transparent); }
+
+html { background-color: var(--background); }
+
+body {
+  margin: 0;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: "Inter", sans-serif;
+  position: relative;
+  min-height: 100vh;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Slightly tighter tracking reads as more "designed" at display sizes. */
+  letter-spacing: -0.006em;
+}
+
+/* ---------------- Cinematic atmosphere ----------------
+   Two fixed, non-interactive layers behind all content: a soft green key
+   light with a vignette, and a fine film grain. Negative z-index keeps them
+   above the body background but below every section. */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 78% at 50% -12%,
+      color-mix(in srgb, var(--accent) 13%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      90% 60% at 88% 8%,
+      color-mix(in srgb, var(--background-accent) 7%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(100% 100% at 50% 45%, transparent 52%, rgb(0 0 0 / 0.6) 100%);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.rounded-token { border-radius: var(--radius); }
+
+/* ---------------- Surfaces ---------------- */
+
+.card {
+  backdrop-filter: blur(14px) saturate(1.2);
+  background: linear-gradient(
+    to bottom right,
+    color-mix(in srgb, var(--color-card) 84%, transparent),
+    color-mix(in srgb, var(--color-card) 48%, transparent)
+  );
+  /* Hairline derived from the foreground, not the card colour — on a dark
+     ground a card-coloured border would be invisible. */
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, var(--foreground) 8%, transparent) inset,
+    0 2px 8px -4px rgb(0 0 0 / 0.55),
+    0 20px 44px -26px rgb(0 0 0 / 0.85);
+}
+
+.card-solid {
+  background: var(--color-card);
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, var(--foreground) 7%, transparent) inset,
+    0 2px 8px -4px rgb(0 0 0 / 0.55);
+}
+
+.card-hover {
+  transition:
+    transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--accent) 26%, transparent);
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, var(--foreground) 12%, transparent) inset,
+    0 28px 60px -28px rgb(0 0 0 / 0.9),
+    0 14px 44px -20px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.primary-button {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-primary-cta) 100%, white 6%),
+    var(--color-primary-cta)
+  );
+  color: var(--color-primary-cta-text);
+  /* A tight contact shadow plus a whisper of green — enough to sit the button
+     on the dark ground without the wide bloom a large ramp produces. */
+  box-shadow:
+    color-mix(in srgb, white 20%, transparent) 0 1px 0 0 inset,
+    color-mix(in srgb, var(--color-primary-cta) 14%, transparent) 0 1px 1px -0.5px,
+    color-mix(in srgb, var(--color-primary-cta) 12%, transparent) 0 3px 3px -1px,
+    color-mix(in srgb, var(--color-primary-cta) 9%, transparent) 0 7px 8px -3px,
+    color-mix(in srgb, var(--color-primary-cta) 7%, transparent) 0 14px 18px -8px,
+    rgb(0 0 0 / 0.35) 0 2px 6px -2px;
+  cursor: pointer;
+  transition:
+    background 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+    filter 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.primary-button:hover:not(:disabled) {
+  /* Glass pane + a small brightness lift + a restrained green bloom. The
+     translucency is capped at 86%/80% so the ink label stays above 5:1. */
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-primary-cta) 86%, transparent),
+    color-mix(in srgb, var(--color-primary-cta) 80%, transparent)
+  );
+  backdrop-filter: blur(10px) saturate(1.1);
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+  box-shadow:
+    color-mix(in srgb, white 28%, transparent) 0 1px 0 0 inset,
+    color-mix(in srgb, var(--color-primary-cta) 32%, transparent) 0 8px 22px -8px,
+    color-mix(in srgb, var(--color-primary-cta) 18%, transparent) 0 16px 40px -16px,
+    rgb(0 0 0 / 0.45) 0 4px 12px -4px;
+}
+.primary-button:active:not(:disabled) {
+  transform: translateY(0);
+  filter: brightness(1);
+}
+.primary-button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.secondary-button {
+  backdrop-filter: blur(14px) saturate(1.2);
+  background: linear-gradient(
+    to bottom right,
+    color-mix(in srgb, var(--color-secondary-cta) 88%, transparent),
+    color-mix(in srgb, var(--color-secondary-cta) 62%, transparent)
+  );
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, var(--foreground) 9%, transparent) inset,
+    0 2px 10px -4px rgb(0 0 0 / 0.6);
+  border: 1px solid color-mix(in srgb, var(--foreground) 13%, transparent);
+  color: var(--color-secondary-cta-text);
+  cursor: pointer;
+  transition:
+    background 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.secondary-button:hover:not(:disabled) {
+  /* Matches the primary's hover language: a touch more translucent, not brighter. */
+  background: linear-gradient(
+    to bottom right,
+    color-mix(in srgb, var(--color-secondary-cta) 70%, transparent),
+    color-mix(in srgb, var(--color-secondary-cta) 46%, transparent)
+  );
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, var(--foreground) 14%, transparent) inset,
+    0 8px 22px -12px rgb(0 0 0 / 0.7),
+    0 0 16px -12px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.secondary-button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.field {
+  backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--color-card) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  color: var(--foreground);
+}
+.field:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent),
+    0 0 24px -8px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* Visible, consistent keyboard focus everywhere that isn't a .field. */
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 75%, transparent);
+  outline-offset: 3px;
+}
+
+/* ---------------- Masks & decoration ---------------- */
+
+.mask-fade-x {
+  mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+.mask-fade-bottom {
+  mask-image: linear-gradient(black 0%, black 50%, transparent 100%);
+}
+.mask-fade-top-overlay {
+  mask-image: linear-gradient(transparent, black 60%);
+}
+
+.ambient::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+      circle at 18% 18%,
+      color-mix(in srgb, var(--background-accent) 14%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(circle at 85% 8%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 50%);
+  animation: ambient-breathe 24s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes ambient-breathe {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+/* ---------------- Motion ---------------- */
+
+.reveal-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(50%);
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reveal-word[data-shown="true"] { opacity: 1; transform: translateY(0); }
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reveal[data-shown="true"] { opacity: 1; transform: translateY(0); }
+
+@keyframes soft-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.06); }
+}
+.soft-pulse { animation: soft-pulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+@keyframes scanline {
+  0% { transform: translateY(0%); }
+  100% { transform: translateY(1000%); }
+}
+.scanline {
+  animation: scanline 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  /* The analysis sweep glows on a dark plate the way a scope readout would. */
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--background-accent) 65%, transparent));
+}
+
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.spin { animation: spin-slow 1s linear infinite; }
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+.shimmer { animation: shimmer 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal-word { opacity: 1 !important; transform: none !important; transition: none; }
+  .soft-pulse, .scanline, .spin, .shimmer { animation: none; }
+  .ambient::after { animation: none; }
+}
+
+::selection {
+  background: color-mix(in srgb, var(--background-accent) 30%, transparent);
+  color: var(--foreground);
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--foreground) 16%, transparent);
+  border-radius: 999px;
+  border: 3px solid var(--background);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* Live camera — the expression label swaps with a short, subtle lift so a
+   change of emotion reads as a transition rather than a hard text swap. */
+@keyframes emotion-swap {
+  from { opacity: 0; transform: translateY(0.28em) scale(0.985); filter: blur(3px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+.emotion-swap { animation: emotion-swap 420ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Mirror the local preview only. The pixels sent for inference are unmirrored. */
+.camera-mirror { transform: scaleX(-1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .emotion-swap { animation: none; }
+}

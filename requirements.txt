@@ -1,0 +1,14 @@
+# Runtime dependencies for the Facial Expression Recognition backend.
+# Pinned to the versions this project is known to work with.
+#
+# NOTE: torch and torchvision are NOT listed here on purpose. They must be
+# installed from the PyTorch index (CUDA or CPU build) — setup_backend.bat
+# does this for you. See SETUP_WINDOWS.md if installing manually.
+
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+python-multipart==0.0.32
+
+mediapipe==1.0.1
+opencv-contrib-python==5.0.0.93
+numpy==2.5.2
